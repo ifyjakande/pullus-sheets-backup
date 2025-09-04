@@ -1,0 +1,36 @@
+name: Backup Google Sheets to S3
+
+on:
+  schedule:
+    - cron: '0 23 * * *'  # 12:00 AM WAT (11:00 PM UTC)
+    - cron: '0 11 * * *'  # 12:00 PM WAT (11:00 AM UTC)
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  backup-sheets:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Run backup script
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+        AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+        GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+        GOOGLE_CHAT_WEBHOOK: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}
+        SHEETS_CONFIG_JSON: ${{ secrets.SHEETS_CONFIG_JSON }}
+      run: python backup_sheets.py
