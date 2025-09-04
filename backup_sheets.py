@@ -322,7 +322,7 @@ class SheetsBackup:
             failed = [r for r in results if not r['success']]
             total_rows = sum(r['rows_backed_up'] for r in successful)
             
-            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S WAT')
+            timestamp = datetime.now().strftime('%Y-%m-%d %I:%M:%S %p WAT')
             
             if failed:
                 status = "⚠️ PARTIAL SUCCESS"
@@ -337,7 +337,7 @@ class SheetsBackup:
             message = {
                 "cards": [{
                     "header": {
-                        "title": f"Pullus Sheets Backup - {status}",
+                        "title": f"Pullus Sales Backup - {status}",
                         "subtitle": timestamp
                     },
                     "sections": [{
