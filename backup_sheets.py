@@ -9,6 +9,7 @@ import logging
 import re
 from datetime import datetime
 from typing import Dict, List, Optional, Any
+import pytz
 import pandas as pd
 import boto3
 from googleapiclient.discovery import build
@@ -228,7 +229,9 @@ class SheetsBackup:
     def _upload_to_s3(self, data: pd.DataFrame, sheet_name: str) -> str:
         """Upload data to S3 in Parquet format with rate limiting"""
         try:
-            timestamp = datetime.now().strftime('%Y%m%d_%I-%M%p_WAT')
+            # Use WAT timezone (UTC+1)
+            wat_tz = pytz.timezone('Africa/Lagos')
+            timestamp = datetime.now(wat_tz).strftime('%Y%m%d_%I-%M%p_WAT')
             s3_key = f"pullus/sales/{sheet_name}/{timestamp}.parquet"
             
             # Convert DataFrame to Parquet bytes
@@ -322,7 +325,9 @@ class SheetsBackup:
             failed = [r for r in results if not r['success']]
             total_rows = sum(r['rows_backed_up'] for r in successful)
             
-            timestamp = datetime.now().strftime('%Y-%m-%d %I:%M:%S %p WAT')
+            # Use WAT timezone for notifications too
+            wat_tz = pytz.timezone('Africa/Lagos')
+            timestamp = datetime.now(wat_tz).strftime('%Y-%m-%d %I:%M:%S %p WAT')
             
             if failed:
                 status = "⚠️ PARTIAL SUCCESS"
