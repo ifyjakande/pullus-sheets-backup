@@ -228,7 +228,7 @@ class SheetsBackup:
     def _upload_to_s3(self, data: pd.DataFrame, sheet_name: str) -> str:
         """Upload data to S3 in Parquet format with rate limiting"""
         try:
-            timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+            timestamp = datetime.now().strftime('%Y%m%d_%I-%M%p_WAT')
             s3_key = f"pullus/sales/{sheet_name}/{timestamp}.parquet"
             
             # Convert DataFrame to Parquet bytes
