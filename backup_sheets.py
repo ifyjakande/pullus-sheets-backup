@@ -16,7 +16,7 @@ from googleapiclient.discovery import build
 from google.oauth2 import service_account
 import requests
 from functools import wraps
-from config import SHEETS_CONFIG
+from config import SHEETS_CONFIG, API_TIMEOUT, MAX_RETRIES
 
 def sanitize_error_message(error_msg: str) -> str:
     """Remove sensitive information from error messages"""
@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 class RateLimiter:
     """Robust rate limiter with exponential backoff and jitter"""
     
-    def __init__(self, max_retries: int = 5):
+    def __init__(self, max_retries: int = MAX_RETRIES):
         self.max_retries = max_retries
         self.base_delay = 1.0
         self.max_delay = 60.0
@@ -84,6 +84,9 @@ class RateLimiter:
                     elif "quota" in str(e).lower() or "rate" in str(e).lower():
                         delay = self.exponential_backoff_with_jitter(attempt)
                         logger.warning(f"Quota/rate error. Retrying in {delay:.2f}s")
+                    elif "timeout" in str(e).lower() or "timed out" in str(e).lower():
+                        delay = self.exponential_backoff_with_jitter(attempt)
+                        logger.warning(f"Timeout error. Retrying in {delay:.2f}s (attempt {attempt + 1}/{self.max_retries})")
                     else:
                         logger.error(f"Non-retryable error: {sanitize_error_message(str(e))}")
                         break
@@ -155,7 +158,7 @@ class SheetsBackup:
             # Get sheet metadata to find all sheets
             sheet_metadata = self.sheets_service.spreadsheets().get(
                 spreadsheetId=sheet_id
-            ).execute()
+            ).execute(timeout=API_TIMEOUT)
             
             # Get data from all sheets in the spreadsheet
             all_data = []
@@ -169,7 +172,7 @@ class SheetsBackup:
                     spreadsheetId=sheet_id,
                     range=range_name,
                     valueRenderOption='FORMATTED_VALUE'
-                ).execute()
+                ).execute(timeout=API_TIMEOUT)
                 
                 values = result.get('values', [])
                 if values:

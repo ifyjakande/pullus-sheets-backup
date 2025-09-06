@@ -29,3 +29,7 @@ S3_PREFIX = 'pullus/sales'
 BACKUP_FORMAT = 'parquet'
 RATE_LIMIT_DELAY = 2  # seconds between API calls
 BATCH_DELAY = 5  # seconds between sheet processing
+
+# Timeout settings
+API_TIMEOUT = 120  # seconds for API calls
+MAX_RETRIES = 5  # maximum retry attempts for failed operations
