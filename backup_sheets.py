@@ -16,7 +16,7 @@ from googleapiclient.discovery import build
 from google.oauth2 import service_account
 import requests
 from functools import wraps
-from config import SHEETS_CONFIG, API_TIMEOUT, MAX_RETRIES
+from config import SHEETS_CONFIG, MAX_RETRIES
 
 def sanitize_error_message(error_msg: str) -> str:
     """Remove sensitive information from error messages"""
@@ -158,7 +158,7 @@ class SheetsBackup:
             # Get sheet metadata to find all sheets
             sheet_metadata = self.sheets_service.spreadsheets().get(
                 spreadsheetId=sheet_id
-            ).execute(timeout=API_TIMEOUT)
+            ).execute()
             
             # Get data from all sheets in the spreadsheet
             all_data = []
@@ -172,7 +172,7 @@ class SheetsBackup:
                     spreadsheetId=sheet_id,
                     range=range_name,
                     valueRenderOption='FORMATTED_VALUE'
-                ).execute(timeout=API_TIMEOUT)
+                ).execute()
                 
                 values = result.get('values', [])
                 if values:
